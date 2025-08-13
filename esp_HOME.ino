@@ -1,7 +1,39 @@
 #include "LoraSuite.h"
 #include "DisplaySuite.h"
 
-void startReceiverTask(void *_) {
+#define ARM_CMD     0x10
+#define DISARM_CMD  0x11
+
+TaskHandle_t gRxTaskHandle = nullptr;
+uint8_t arm_pkg[] = { ARM_CMD };
+uint8_t disarm_pkg[] = { DISARM_CMD };
+
+void sendSerialCmdTask(void *_) {
+  for (;;) {
+    if (Serial.available()) {
+      int receivedByte = Serial.read();
+      switch (receivedByte) {
+        case ARM_CMD:
+            loraSend(arm_pkg, sizeof(arm_pkg), 3000);
+            Serial.println("# TX LoRa: ARM");
+            break;
+        case DISARM_CMD:
+            loraSend(disarm_pkg, sizeof(disarm_pkg), 3000);
+            Serial.println("# TX LoRa: DISARM");
+            break;
+        case '\n':
+            break;
+        default:
+            Serial.println("UNKNOWN ");
+            Serial.println(receivedByte);
+            break;
+      }
+    }
+    vTaskDelay(1);
+  }
+}
+
+void receiverTask(void *_) {
   uint8_t buf[32];
   int16_t rssi;
   int8_t  snr;
@@ -41,7 +73,8 @@ void setup() {
   Serial.begin(115200);
   delay(200);
   displayLogo();
-  xTaskCreatePinnedToCore(startReceiverTask, "LoRaRX", 4096, nullptr, 1, nullptr, 0);
+  xTaskCreatePinnedToCore(receiverTask, "LoRaRX", 4096, nullptr, 1, &gRxTaskHandle, 0);
+  xTaskCreatePinnedToCore(sendSerialCmdTask, "LoRaTX", 4096, nullptr, 1, nullptr, 0);
 }
 
 

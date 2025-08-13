@@ -2,6 +2,11 @@
 #include "Arduino.h"
 #include "LoRaWan_APP.h"
 
+#ifdef ARDUINO_ARCH_ESP32
+  #include "freertos/FreeRTOS.h"
+  #include "freertos/task.h"
+#endif
+
 // ---------- Radio params (edit to taste) ----------
 #ifndef LORA_RF_FREQUENCY
 #define LORA_RF_FREQUENCY               868000000UL // Hz
@@ -27,6 +32,8 @@
 #ifndef LORA_IQ_INVERSION_ON
 #define LORA_IQ_INVERSION_ON            false
 #endif
+
+extern TaskHandle_t gRxTaskHandle; 
 
 // ---------- Internal state ----------
 static RadioEvents_t _evt;
@@ -101,6 +108,14 @@ void loraSend(const uint8_t* data, uint16_t len, uint32_t txTimeoutMs /*=3000*/)
   _ensureInit();
   _txDone = false;
   _txError = false;
+  
+  // ------ SUSPEND RX task
+  if (gRxTaskHandle) {
+    Serial.println("SUSPENDING RX");
+    vTaskSuspend(gRxTaskHandle);   // stop the RX loop from touching the radio
+    Radio.Sleep();                 // make sure we’re not in RX
+    delay(2);                      // tiny settle (guards against back-to-back state changes)
+  }
 
   // Fire TX
   Radio.Send((uint8_t*)data, len);
@@ -124,6 +139,14 @@ void loraSend(const uint8_t* data, uint16_t len, uint32_t txTimeoutMs /*=3000*/)
     Serial.println("LORA SEND SUCCESS");
   } else {
     Serial.println("LORA SEND FAILED");
+  }
+
+  // ------ RESUME RX task
+  if (gRxTaskHandle) {
+    Serial.println("RESUMING RX");
+    _rxDone = false;    // clear any stale flags before RX task resumes
+    _rxError = false;
+    vTaskResume(gRxTaskHandle);
   }
 }
 
