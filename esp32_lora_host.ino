@@ -10,6 +10,9 @@ volatile uint8_t  expectedAck = 0;
 volatile bool     ackReceived = false;
 volatile bool     isArmed = false;
 
+constexpr uint8_t STATUS_OPT_NONE   = 0x00;
+constexpr uint8_t STATUS_OPT_MOTION = 0x01;
+
 void setup() {
   Serial.begin(115200);
   delay(300);
@@ -55,22 +58,33 @@ bool sendMessage(const uint8_t* package,
   return false;
 }
 
+void onMotion(int16_t rssi, int8_t snr) {
+  Serial.write((uint8_t)0x01); // 1 byte = MOTION
+  Serial.write((uint8_t)rssi); // signal strength (GOOD 0-90 BAD)
+  Serial.write((uint8_t)snr);  // signal-to-noise (GOOD > -5dB < BAD)
+  Serial.write('\n'); 
+  Serial.println("received -> 0x01 code: Motion Detected.");
+}
+
 void processReceivedPacket(const uint8_t* data, uint16_t len, int16_t rssi, int8_t snr) {
   Serial.printf("data=%u, rssi=%d, snr=%d\n", data[0], rssi, snr);
   const uint8_t* alarmStatusReply = isArmed ? ARM_PKG : DISARM_PKG;
 
   switch(data[0]) {
     case 0x01:
-      Serial.write((uint8_t)0x01); // 1 byte = MOTION
-      Serial.write((uint8_t)rssi); // signal strength (GOOD 0-90 BAD)
-      Serial.write((uint8_t)snr);  // signal-to-noise (GOOD > -5dB < BAD)
-      Serial.write('\n'); 
-      Serial.println("received -> 0x01 code: Motion Detected.");
+      onMotion(rssi, snr);
       break; 
-    case 0x90:
+    case 0x90: {
       Serial.println("received -> 0x90 code: Request ARM/UNARM status.");
+      const uint8_t optionalByte = (len >= 2) ? data[1] : STATUS_OPT_NONE;
+
+      if (optionalByte == STATUS_OPT_MOTION) {
+        onMotion(rssi, snr);
+      }
+
       sendMessage(alarmStatusReply);
       break;
+    }
     case 0x10:
       if (expectedAck == 0x10) { 
         ackReceived = true; 
@@ -89,6 +103,16 @@ void processReceivedPacket(const uint8_t* data, uint16_t len, int16_t rssi, int8
         Serial.println("received -> 0x11 (unexpected)");
       }
       break;
+    case 0x80: {
+      if (len >= 2) {
+        uint8_t pct = data[1];
+        Serial.write((uint8_t)0x80);
+        Serial.write(pct);
+        Serial.write('\n');
+        Serial.printf("received -> 0x80 code: BATTERY %u%%\n", pct);
+      }
+      break;
+    }
     default:
       Serial.println("received -> UNKNOWN code or data not binary.");
       break;
