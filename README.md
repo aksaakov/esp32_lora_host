@@ -6,6 +6,7 @@ The host is intended to run on a Raspberry Pi (or similar) and acts as a bridge 
 It provides:
 Reliable two-way communication with a standalone remote ESP32 LoRa device.
 MQTT integration for motion detection, alarm control, and battery reporting.
+_For the MQTT bridge code and HA configuration just vibe it_
 Automatic re-arm logic (configurable from Home Assistant).
 Simple serial logging for debugging.
 
@@ -26,5 +27,3 @@ Remote device: Another Heltec ESP32 v3 (and other components specified in the re
 ).
 
 To see the host esp32 repo go [here](https://github.com/aksaakov/esp32_lora_remote).
-
-_For the MQTT bridge and HA configuration just vibe it_
