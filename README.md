@@ -22,7 +22,9 @@ Debug logging: Prints all LoRa activity and MQTT publishes/subscribes to the con
 
 Host: Raspberry Pi (any model with USB), running Linux.
 LoRa board: Heltec ESP32 v3 LoRa module (connected to Pi over USB).
-Remote device: Another Heltec ESP32 v3 with PIR sensor + alarm relay (see [remote repo](https://github.com/aksaakov/esp32_lora_remote)
+Remote device: Another Heltec ESP32 v3 (and other components specified in the remote repo).
 ).
+
+To see the host esp32 repo go [here](https://github.com/aksaakov/esp32_lora_remote).
 
 _For the MQTT bridge and HA configuration just vibe it_
