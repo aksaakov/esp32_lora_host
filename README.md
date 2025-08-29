@@ -1,4 +1,4 @@
-**ESP32 LoRa Host**
+## ESP32 LoRa Host
 
 This project is the host side of a two-way LoRa communication system built with Heltec ESP32 v3 LoRa boards.
 The host is intended to run on a Raspberry Pi (or similar) and acts as a bridge between LoRa devices and Home Assistant via MQTT.
@@ -21,7 +21,7 @@ Simple serial logging for debugging.
 - **Auto-arm toggle**: Configurable from Home Assistant. If enabled, the alarm re-arms automatically after a timeout.  
 - **Debug logging**: Prints all LoRa activity and MQTT publishes/subscribes to the console.  
 
-**Hardware Requirements**
+## Hardware Requirements
 
 Host: Raspberry Pi (any model with USB), running Linux.
 LoRa board: Heltec ESP32 v3 LoRa module (connected to Pi over USB).
