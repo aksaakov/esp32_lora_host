@@ -12,12 +12,14 @@ Simple serial logging for debugging.
 
 **Features**
 
-LoRa ↔ MQTT bridge: Receives LoRa packets from the remote and publishes them to MQTT topics, and vice-versa.
-Alarm control: Host can remotely arm/disarm the remote alarm.
-Motion events: Motion detected by the remote is published as MQTT events.
-Battery reporting: Remote device sends periodic battery % updates, which the host publishes as an MQTT sensor.
-Auto-arm toggle: Configurable from Home Assistant. If enabled, the alarm re-arms automatically after a timeout.
-Debug logging: Prints all LoRa activity and MQTT publishes/subscribes to the console.
+## Features
+
+- **LoRa ↔ MQTT bridge**: Receives LoRa packets from the remote and publishes them to MQTT topics, and vice-versa.  
+- **Alarm control**: Host can remotely arm/disarm the remote alarm.  
+- **Motion events**: Motion detected by the remote is published as MQTT events.  
+- **Battery reporting**: Remote device sends periodic battery % updates, which the host publishes as an MQTT sensor.  
+- **Auto-arm toggle**: Configurable from Home Assistant. If enabled, the alarm re-arms automatically after a timeout.  
+- **Debug logging**: Prints all LoRa activity and MQTT publishes/subscribes to the console.  
 
 **Hardware Requirements**
 
